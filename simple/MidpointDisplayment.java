@@ -81,6 +81,7 @@ public class MidpointDisplayment {
 
     public static void main(String... args) {
         JFrame mainFrame = new JFrame("Midpoint Displayment Demo");
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Canvas canvas = new Canvas();
         canvas.setSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
