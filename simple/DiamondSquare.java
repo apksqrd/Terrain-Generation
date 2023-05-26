@@ -121,7 +121,7 @@ public class DiamondSquare {
     }
 
     public static double[][] increaseDefinition(double[][] heightMap, double currentRandomness) {
-        // TODO: check non-square and even length more
+        // TODO: check non-square and even length works
 
         double[][] definedHeightMap = new double[2 * heightMap.length - 1][2 * heightMap[0].length - 1];
 
@@ -355,6 +355,7 @@ public class DiamondSquare {
 
         controlPanel.add(initialHeightMapTextArea);
         controlPanel.add(generateButton);
+
         mainFrame.add(controlPanel);
         mainFrame.pack();
         mainFrame.setVisible(true);

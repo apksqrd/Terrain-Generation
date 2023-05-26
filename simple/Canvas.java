@@ -8,6 +8,7 @@ import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.DoubleToIntFunction;
+import java.util.function.DoubleUnaryOperator;
 import java.util.logging.Logger;
 
 import javax.swing.JPanel;
@@ -132,7 +133,8 @@ public class Canvas extends JPanel {
                     new SingularColorGradient(0.35, 0.4, Color.YELLOW, Color.GREEN),
                     new SingularColorGradient(0.4, 0.6, Color.GREEN, Color.GREEN),
                     new SingularColorGradient(0.6, 0.8, Color.DARK_GRAY, Color.GRAY),
-                    new SingularColorGradient(0.8, Double.POSITIVE_INFINITY, Color.WHITE, Color.WHITE));
+                    new SingularColorGradient(0.8, 1, Color.LIGHT_GRAY, Color.WHITE),
+                    new SingularColorGradient(1, Double.POSITIVE_INFINITY, Color.WHITE, Color.WHITE));
         }
 
         @Override
@@ -245,6 +247,56 @@ public class Canvas extends JPanel {
         public void paintOnTo(Graphics g) {
             g.setColor(color);
             g.fillPolygon(xPoints, yPoints, xPoints.length);
+        }
+    }
+
+    public static class Graph implements Shape {
+        private int displayWidth, displayHeight;
+        private double viewXStart, viewXEnd, viewYStart, viewYEnd;
+        private ArrayList<DoubleUnaryOperator> functions;
+
+        public Graph(int displayWidth, int displayHeight, double viewXStart,
+                double viewXEnd, double viewYStart, double viewYEnd) {
+            this.displayWidth = displayWidth;
+            this.displayHeight = displayHeight;
+            this.viewXStart = viewXStart;
+            this.viewXEnd = viewXEnd;
+            this.viewYStart = viewYStart;
+            this.viewYEnd = viewYEnd;
+            this.functions = new ArrayList<>();
+        }
+
+        public void addFunction(DoubleUnaryOperator function) {
+            functions.add(function);
+        }
+
+        @Override
+        public void paintOnTo(Graphics g) {
+            for (DoubleUnaryOperator function : functions) {
+                int prevX = 0,
+                        prevY = (int) mapToRange(function.applyAsDouble(
+                                mapToRange(prevX, 0, displayWidth, viewXStart, viewXEnd)),
+                                viewYStart, viewYEnd, displayHeight, 0);
+
+                for (int i = 1; i <= displayWidth; i++) {
+                    int newX = i, newY = (int) mapToRange(function.applyAsDouble(
+                            mapToRange(newX, 0, displayWidth, viewXStart, viewXEnd)),
+                            viewYStart, viewYEnd, displayHeight, 0);
+
+                    g.drawLine(prevX, prevY, newX, newY);
+
+                    prevX = newX;
+                    prevY = newY;
+                }
+            }
+
+            // - x-axis
+            int viewY0ToDisplayY = (int) mapToRange(0, viewYStart, viewYEnd, displayHeight, 0);
+            g.drawLine(0, viewY0ToDisplayY, displayWidth, viewY0ToDisplayY);
+
+            // | y-axis
+            int viewX0ToDisplayX = (int) mapToRange(0, viewXStart, viewXEnd, 0, displayWidth);
+            g.drawLine(viewX0ToDisplayX, 0, viewX0ToDisplayX, displayHeight);
         }
     }
 
