@@ -2,7 +2,9 @@ package simple;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.util.Random;
 import java.util.function.DoubleUnaryOperator;
+import java.util.function.LongToDoubleFunction;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -13,6 +15,15 @@ import javax.swing.event.ChangeListener;
 import simple.Canvas.Graph;
 
 public class Perlin {
+    public static double random(long seed, double origin, double bound) {
+        // Java's default random is kinda bad for this purpose since it
+        // 1: requires an object for deterministic results
+        // (setting the seed)
+        // 2: returns similar outputs for similar inputs
+
+        return new Random(new Random(new Random(seed).nextLong()).nextLong()).nextDouble(origin, bound);
+    }
+
     /**
      * Look inside the code for the math
      * 
@@ -22,7 +33,7 @@ public class Perlin {
      * @param slope1 p'(1)
      * @return p a cubic function
      */
-    private static DoubleUnaryOperator createCubic(double value0, double value1, double slope0, double slope1) {
+    public static DoubleUnaryOperator createCubic(double value0, double value1, double slope0, double slope1) {
         /*
          * let: p(x) = n3 * x^3 + n2 * x^2 + n1 * x^1 + n0 * x^0
          * 
@@ -74,9 +85,27 @@ public class Perlin {
     }
 
     // assumes p(0) = p(1) = 0
-    private static DoubleUnaryOperator createCubic(double slope0, double slope1) {
+    public static DoubleUnaryOperator createCubic(double slope0, double slope1) {
         return (height) -> (slope0 + slope1) * height * height * height
                 + (-2 * slope0 - slope1) * height * height + (slope0) * height;
+    }
+
+    public static double cubicSlopeInterpolation(double x, double slope0, double slope1) {
+        return (slope0 + slope1) * x * x * x + (-2 * slope0 - slope1) * x * x + (slope0) * x;
+    }
+
+    /**
+     * Assumes x is non-negative.
+     * 
+     * The range of perlin is smaller than the range of the slopes.
+     * 
+     * @param x
+     * @param slopeGenerator
+     * @return
+     */
+    public static double perlin(double x, LongToDoubleFunction slopeGenerator) {
+        return cubicSlopeInterpolation(x % 1, slopeGenerator.applyAsDouble((long) x),
+                slopeGenerator.applyAsDouble((long) x + 1));
     }
 
     public static void main(String[] args) {
@@ -87,25 +116,30 @@ public class Perlin {
         canvas.setSize(new Dimension(540, 540));
 
         JPanel controlPanel = new JPanel();
+
         {
             final int SCALE_FACTOR = 10;
 
             JSlider slope0Slider = new JSlider(-2 * SCALE_FACTOR, 2 * SCALE_FACTOR);
             JSlider slope1Slider = new JSlider(-2 * SCALE_FACTOR, 2 * SCALE_FACTOR);
+            slope0Slider.setValue(1 * SCALE_FACTOR);
+            slope1Slider.setValue(1 * SCALE_FACTOR);
 
             ChangeListener slopeChangeListener = new ChangeListener() {
                 @Override
                 public void stateChanged(ChangeEvent e) {
                     canvas.clear();
 
-                    Graph graph = new Graph(540, 540, -0.5, 1.5, -1, 1);
+                    Graph graph = new Graph(540, 540, -0.5, 9.5, -1.5, 1.5);
 
                     double slope0 = (double) slope0Slider.getValue() / SCALE_FACTOR;
                     double slope1 = (double) slope1Slider.getValue() / SCALE_FACTOR;
 
-                    graph.addFunction(createCubic(slope0, slope1));
-                    graph.addFunction((x) -> slope0 * x);
-                    graph.addFunction((x) -> slope1 * (x - 1));
+                    graph.addFunction((x) -> -1);
+                    graph.addFunction((x) -> 1);
+                    graph.addFunction((x) -> perlin(x, (seed) -> random(seed, -2, 2)));
+                    // graph.addFunction((x) -> slope0 * x);
+                    // graph.addFunction((x) -> slope1 * (x - 1));
 
                     canvas.addShape(graph);
                 }

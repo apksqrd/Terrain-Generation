@@ -358,6 +358,7 @@ public class DiamondSquare {
 
         mainFrame.add(controlPanel);
         mainFrame.pack();
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setVisible(true);
     }
 

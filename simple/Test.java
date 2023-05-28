@@ -1,6 +1,7 @@
 package simple;
 
 import java.awt.Color;
+import java.util.Random;
 
 import simple.Canvas.ColorGradient.SingularColorGradient;
 
@@ -11,5 +12,15 @@ public class Test {
                 Color.WHITE);
         System.out.println(Integer.toBinaryString(Color.WHITE.getRGB()));
         System.out.println(Integer.toBinaryString(gradient.getColor(-0.3)));
+
+        Random randomNumberGenerator = new Random(12345L);
+        System.out.println(randomNumberGenerator.nextDouble());
+        System.out.println(randomNumberGenerator.nextDouble());
+        randomNumberGenerator.setSeed(12345L);
+        System.out.println(randomNumberGenerator.nextDouble());
+        System.out.println(randomNumberGenerator.nextDouble());
+        randomNumberGenerator.setSeed(12346L);
+        System.out.println(randomNumberGenerator.nextDouble());
+        System.out.println(randomNumberGenerator.nextDouble());
     }
 }

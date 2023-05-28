@@ -273,17 +273,18 @@ public class Canvas extends JPanel {
         @Override
         public void paintOnTo(Graphics g) {
             for (DoubleUnaryOperator function : functions) {
-                int prevX = 0,
-                        prevY = (int) mapToRange(function.applyAsDouble(
-                                mapToRange(prevX, 0, displayWidth, viewXStart, viewXEnd)),
-                                viewYStart, viewYEnd, displayHeight, 0);
+                int prevX = -1;
+                double prevY = Double.NaN;
 
                 for (int i = 1; i <= displayWidth; i++) {
-                    int newX = i, newY = (int) mapToRange(function.applyAsDouble(
+                    int newX = i;
+                    double newY = mapToRange(function.applyAsDouble(
                             mapToRange(newX, 0, displayWidth, viewXStart, viewXEnd)),
                             viewYStart, viewYEnd, displayHeight, 0);
 
-                    g.drawLine(prevX, prevY, newX, newY);
+                    if (!Double.isNaN(prevY) && !Double.isNaN(newY)) {
+                        g.drawLine(prevX, (int) prevY, newX, (int) newY);
+                    }
 
                     prevX = newX;
                     prevY = newY;
