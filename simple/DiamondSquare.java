@@ -56,7 +56,7 @@ public class DiamondSquare {
                 double average = (heightMap[row - halfSize][col - halfSize] + heightMap[row - halfSize][col + halfSize]
                         + heightMap[row + halfSize][col - halfSize] + heightMap[row + halfSize][col + halfSize]) / 4;
 
-                heightMap[row][col] = Canvas.mapToRange(
+                heightMap[row][col] = MathUtils.mapToRange(
                         Math.random(), 0, 1, average - currentRandomness, average + currentRandomness);
                 heightMap[row][col] = average;
             }
@@ -90,7 +90,7 @@ public class DiamondSquare {
 
                 double average = sum / numNear;
 
-                heightMap[row][col] = Canvas.mapToRange(
+                heightMap[row][col] = MathUtils.mapToRange(
                         Math.random(), 0, 1, average - currentRandomness, average + currentRandomness);
             }
         }
@@ -112,7 +112,7 @@ public class DiamondSquare {
 
                 double average = sum / numNear;
 
-                heightMap[row][col] = Canvas.mapToRange(
+                heightMap[row][col] = MathUtils.mapToRange(
                         Math.random(), 0, 1, average - currentRandomness, average + currentRandomness);
             }
         }
@@ -136,7 +136,7 @@ public class DiamondSquare {
                 double average = (definedHeightMap[row - 1][col - 1] + definedHeightMap[row - 1][col + 1]
                         + definedHeightMap[row + 1][col - 1] + definedHeightMap[row + 1][col + 1]) / 4;
 
-                definedHeightMap[row][col] = Canvas.mapToRange(
+                definedHeightMap[row][col] = MathUtils.mapToRange(
                         Math.random(), 0, 1, average - currentRandomness, average + currentRandomness);
                 definedHeightMap[row][col] = average;
             }
@@ -160,7 +160,7 @@ public class DiamondSquare {
 
                     double average = sum / numNear;
 
-                    definedHeightMap[row][col] = Canvas.mapToRange(
+                    definedHeightMap[row][col] = MathUtils.mapToRange(
                             Math.random(), 0, 1, average - currentRandomness, average + currentRandomness);
                 }
             }
@@ -182,7 +182,7 @@ public class DiamondSquare {
 
                     double average = sum / numNear;
 
-                    definedHeightMap[row][col] = Canvas.mapToRange(
+                    definedHeightMap[row][col] = MathUtils.mapToRange(
                             Math.random(), 0, 1, average - currentRandomness, average + currentRandomness);
                 }
             }

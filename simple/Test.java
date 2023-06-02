@@ -7,7 +7,7 @@ import simple.Canvas.ColorGradient.SingularColorGradient;
 
 public class Test {
     public static void main(String[] args) {
-        System.out.println(Canvas.mapToRange(0, Double.NEGATIVE_INFINITY, 0, 0, 1));
+        System.out.println(MathUtils.mapToRange(0, Double.NEGATIVE_INFINITY, 0, 0, 1));
         SingularColorGradient gradient = new SingularColorGradient(Double.NEGATIVE_INFINITY, 0, Color.BLACK,
                 Color.WHITE);
         System.out.println(Integer.toBinaryString(Color.WHITE.getRGB()));
@@ -22,5 +22,9 @@ public class Test {
         randomNumberGenerator.setSeed(12346L);
         System.out.println(randomNumberGenerator.nextDouble());
         System.out.println(randomNumberGenerator.nextDouble());
+
+        System.out.println(Integer.toBinaryString((3 >> 0) & 1));
+        System.out.println(Integer.toBinaryString((3 >> 1) & 1));
+        System.out.println(Integer.toBinaryString((3 >> 2) & 1));
     }
 }

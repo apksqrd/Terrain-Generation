@@ -1,5 +1,7 @@
 package simple;
 
+import static simple.MathUtils.mapToRange;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -19,33 +21,17 @@ import javax.swing.JPanel;
  * make this into a whole library.
  * 
  * (Actually, that is not a bad idea for my next project...)
+ * 
+ * TODO: for all of the shapes like graph, just get rid of the display x y width
+ * height options. Just do fullscreen.
+ * ^ I tried that and getting the dimensions of a Graphics object is actually
+ * not as easy as I thought
  */
 public class Canvas extends JPanel {
     public static Logger logger = Logger.getLogger(Canvas.class.getName());
 
     public static interface Shape {
         public void paintOnTo(Graphics g);
-    }
-
-    public static double mapToRange(double point, double initialMin, double initialMax, double newMin,
-            double newMax) {
-        if (newMax == newMin) {
-            // logger.warning("New max and min were same.");
-            return newMin;
-        } else if (Double.isInfinite(initialMin)) {
-            // assume this is negative and the only infinite param
-            return newMax;
-        } else if (Double.isInfinite(initialMax)) {
-            // assume this is positive and the only infinite param
-            return newMin;
-        }
-
-        if (initialMax == initialMin) {
-            initialMin = 0;
-            initialMax = 1;
-            logger.warning("Initial max and min were same.");
-        }
-        return newMin + ((point - initialMin) / (initialMax - initialMin)) * (newMax - newMin);
     }
 
     public static class ColorGradient implements DoubleToIntFunction {
@@ -105,7 +91,7 @@ public class Canvas extends JPanel {
             }
 
             public int getColor(double height) {
-                return mixColor(mapToRange(height, startHeight, endHeight, 0, 1), startColor, endColor);
+                return mixColor(MathUtils.mapToRange(height, startHeight, endHeight, 0, 1), startColor, endColor);
             }
         }
 
@@ -135,6 +121,19 @@ public class Canvas extends JPanel {
                     new SingularColorGradient(0.6, 0.8, Color.DARK_GRAY, Color.GRAY),
                     new SingularColorGradient(0.8, 1, Color.LIGHT_GRAY, Color.WHITE),
                     new SingularColorGradient(1, Double.POSITIVE_INFINITY, Color.WHITE, Color.WHITE));
+        }
+
+        public static DoubleToIntFunction createStripedGradient(double changeFrequency) {
+            return new DoubleToIntFunction() {
+                @Override
+                public int applyAsInt(double value) {
+                    if (value % changeFrequency < changeFrequency / 2.0) {
+                        return 0x4F000000;
+                    } else {
+                        return 0x4FFFFFFF;
+                    }
+                }
+            };
         }
 
         @Override
@@ -215,7 +214,8 @@ public class Canvas extends JPanel {
 
             for (int i = 0; i < heightMap.length; i++) {
                 xPoints[i] = i * viewWidth / (heightMap.length - 1);
-                yPoints[i] = (int) Math.floor(mapToRange(heightMap[i], heightMapMin, heightMapMax, 0, viewHeight));
+                yPoints[i] = (int) Math
+                        .floor(MathUtils.mapToRange(heightMap[i], heightMapMin, heightMapMax, 0, viewHeight));
             }
 
             // add points at the bottom
@@ -250,6 +250,47 @@ public class Canvas extends JPanel {
         }
     }
 
+    public static class ColorMap implements Shape {
+        @FunctionalInterface
+        public static interface TwoDimensionToOneDimensionFunction {
+            public double apply(double x, double y);
+        }
+
+        private final int displayWidth, displayHeight;
+        private final double viewXStart,
+                viewXEnd, viewYStart, viewYEnd;
+        private TwoDimensionToOneDimensionFunction function;
+        private DoubleToIntFunction heightToRGBFunction;
+
+        public ColorMap(TwoDimensionToOneDimensionFunction function, int displayWidth, int displayHeight,
+                double viewXStart, double viewXEnd, double viewYStart, double viewYEnd,
+                DoubleToIntFunction heightToRGBFunction) {
+            this.displayWidth = displayWidth;
+            this.displayHeight = displayHeight;
+            this.viewXStart = viewXStart;
+            this.viewXEnd = viewXEnd;
+            this.viewYStart = viewYStart;
+            this.viewYEnd = viewYEnd;
+            this.function = function;
+            this.heightToRGBFunction = heightToRGBFunction;
+        }
+
+        @Override
+        public void paintOnTo(Graphics g) {
+            double[][] heightMap = new double[displayHeight][displayWidth];
+
+            for (int y = 0; y < heightMap.length; y++) {
+                for (int x = 0; x < heightMap[0].length; x++) {
+                    heightMap[y][x] = function.apply(
+                            MathUtils.mapToRange(x, 0, heightMap[0].length, viewXStart, viewXEnd),
+                            MathUtils.mapToRange(y, 0, heightMap.length, viewYEnd, viewYStart));
+                }
+            }
+
+            new PixelGrid(heightMap, 0, 0, displayHeight, displayWidth, heightToRGBFunction).paintOnTo(g);
+        }
+    }
+
     public static class Graph implements Shape {
         private int displayWidth, displayHeight;
         private double viewXStart, viewXEnd, viewYStart, viewYEnd;
@@ -278,8 +319,8 @@ public class Canvas extends JPanel {
 
                 for (int i = 1; i <= displayWidth; i++) {
                     int newX = i;
-                    double newY = mapToRange(function.applyAsDouble(
-                            mapToRange(newX, 0, displayWidth, viewXStart, viewXEnd)),
+                    double newY = MathUtils.mapToRange(function.applyAsDouble(
+                            MathUtils.mapToRange(newX, 0, displayWidth, viewXStart, viewXEnd)),
                             viewYStart, viewYEnd, displayHeight, 0);
 
                     if (!Double.isNaN(prevY) && !Double.isNaN(newY)) {
@@ -292,12 +333,46 @@ public class Canvas extends JPanel {
             }
 
             // - x-axis
-            int viewY0ToDisplayY = (int) mapToRange(0, viewYStart, viewYEnd, displayHeight, 0);
+            int viewY0ToDisplayY = (int) MathUtils.mapToRange(0, viewYStart, viewYEnd, displayHeight, 0);
             g.drawLine(0, viewY0ToDisplayY, displayWidth, viewY0ToDisplayY);
 
             // | y-axis
-            int viewX0ToDisplayX = (int) mapToRange(0, viewXStart, viewXEnd, 0, displayWidth);
+            int viewX0ToDisplayX = (int) MathUtils.mapToRange(0, viewXStart, viewXEnd, 0, displayWidth);
             g.drawLine(viewX0ToDisplayX, 0, viewX0ToDisplayX, displayHeight);
+        }
+    }
+
+    public static class VectorField implements Shape {
+        private final int displayWidth, displayHeight;
+        private final double viewXStart, viewXEnd, viewYStart, viewYEnd;
+
+        // A vector is in the form of: {startX, startY, width, height}
+        private double[][] vectors;
+
+        public VectorField(int displayWidth, int displayHeight, double viewXStart, double viewXEnd, double viewYStart,
+                double viewYEnd, double[][] vectors) {
+            this.displayWidth = displayWidth;
+            this.displayHeight = displayHeight;
+            this.viewXStart = viewXStart;
+            this.viewXEnd = viewXEnd;
+            this.viewYStart = viewYStart;
+            this.viewYEnd = viewYEnd;
+
+            this.vectors = vectors;
+        }
+
+        @Override
+        public void paintOnTo(Graphics g) {
+            for (double[] vector : vectors) {
+                // vector: {x, y, width, height}
+                int x1 = (int) mapToRange(vector[0], viewXStart, viewXEnd, 0, displayWidth),
+                        y1 = (int) mapToRange(vector[1], viewYStart, viewYEnd, displayHeight, 0),
+                        x2 = (int) mapToRange(vector[0] + vector[2], viewXStart, viewXEnd, 0, displayWidth),
+                        y2 = (int) mapToRange(vector[1] + vector[3], viewYStart, viewYEnd, displayHeight, 0);
+
+                g.fillOval(x1 - 2, y1 - 2, 4, 4);
+                g.drawLine(x1, y1, x2, y2);
+            }
         }
     }
 

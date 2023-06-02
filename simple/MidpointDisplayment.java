@@ -27,12 +27,12 @@ public class MidpointDisplayment {
         for (int i = 0; i < initialHeights.length - 1; i++) {
             nextHeights[2 * i] = initialHeights[i];
             if (isMutationRateMultiplicative) {
-                nextHeights[2 * i + 1] = Canvas.mapToRange((2 * Math.random() - 1) * mutationRate, -1, 1,
+                nextHeights[2 * i + 1] = MathUtils.mapToRange((2 * Math.random() - 1) * mutationRate, -1, 1,
                         initialHeights[i],
                         initialHeights[i + 1]);
             } else {
                 double midpoint = (initialHeights[i] + initialHeights[i + 1]) / 2.0;
-                nextHeights[2 * i + 1] = Canvas.mapToRange(Math.random(), 0, 1, midpoint - mutationRate,
+                nextHeights[2 * i + 1] = MathUtils.mapToRange(Math.random(), 0, 1, midpoint - mutationRate,
                         midpoint + mutationRate);
             }
         }
