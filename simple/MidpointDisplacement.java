@@ -19,7 +19,7 @@ import javax.swing.border.LineBorder;
 
 import simple.Canvas.Polygon;
 
-public class MidpointDisplayment {
+public class MidpointDisplacement {
     public static double[] doIteration(double[] initialHeights, double mutationRate,
             boolean isMutationRateMultiplicative) {
         double[] nextHeights = new double[2 * initialHeights.length - 1];
@@ -80,7 +80,7 @@ public class MidpointDisplayment {
     }
 
     public static void main(String... args) {
-        JFrame mainFrame = new JFrame("Midpoint Displayment Demo");
+        JFrame mainFrame = new JFrame("Midpoint Displacement Demo");
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Canvas canvas = new Canvas();

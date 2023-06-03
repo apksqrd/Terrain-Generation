@@ -8,8 +8,8 @@ public class Demonstrations {
      * implemented and therefore least to most complicated.
      */
     static final Runnable[] demonstrations = {
-            // Midpoint Displayment
-            MidpointDisplayment::main,
+            // Midpoint Displacement
+            MidpointDisplacement::main,
 
             // Diamond Square
             DiamondSquare::createTerrainEditorGenerator,

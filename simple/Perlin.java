@@ -681,7 +681,7 @@ public class Perlin {
     }
 
     public static void slopeInterpolationDemo1D() {
-        JFrame mainFrame = new JFrame("Fade Slope Interpolation Demo");
+        JFrame mainFrame = new JFrame("Weighted Slope Interpolation Demo");
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Canvas canvas = new Canvas();
